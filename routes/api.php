@@ -219,7 +219,7 @@ Route::namespace('Seller')->prefix('Seller')->group(function(){
     
 });
 Route::get('test',function(){
-    echo 666;
+    echo 666;die;
 });
 /**
  * 
