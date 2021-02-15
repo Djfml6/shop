@@ -2,7 +2,7 @@
 /public/Uploads
 /public/dist
 /public/storage
-/storage/*.key
+/storage
 /packages
 /vendor
 .env

@@ -22,6 +22,10 @@ use Illuminate\Support\Facades\Route;
  * 
  */
 
+Route::get('test',function(){
+    dd(6666);
+});
+
 Route::namespace('Admin')->prefix('Admin')->group(function(){
 
     Route::post('/login','LoginController@login'); // 登陆
