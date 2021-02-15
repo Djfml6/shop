@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
  */
 
 Route::get('test',function(){
-    return 777888;
+    var_dump(888);die;
 });
 
 Route::namespace('Admin')->prefix('Admin')->group(function(){
