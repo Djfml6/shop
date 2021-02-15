@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
  */
 
 Route::get('test',function(){
-    echo 777888;
+    return 777888;
 });
 
 Route::namespace('Admin')->prefix('Admin')->group(function(){
