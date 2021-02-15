@@ -22,9 +22,6 @@ use Illuminate\Support\Facades\Route;
  * 
  */
 
-Route::get('test',function(){
-    var_dump(888);die;
-});
 
 Route::namespace('Admin')->prefix('Admin')->group(function(){
 
@@ -221,7 +218,9 @@ Route::namespace('Seller')->prefix('Seller')->group(function(){
 
     
 });
-
+Route::get('test',function(){
+    echo 666;
+});
 /**
  * 
  * 

@@ -21,6 +21,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\CorsAjax::class,
     ];
 
     /**
@@ -40,9 +41,9 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            'throttle:1000,1',
+            'throttle:60,1',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \Illuminate\Session\Middleware\StartSession::class,
+            // \Illuminate\Session\Middleware\StartSession::class,
         ],
     ];
 
