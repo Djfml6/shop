@@ -411,4 +411,12 @@ class GoodsService extends BaseService{
                         ->paginate(request()->per_page??30);
         return $this->format(new SeckillGoodsCollection($list));
     }
+
+    // 获取首页主推商品
+    public function getHomeMasterGoods()
+    {
+        $goods_model = new Goods();
+        $list = $goods_model->where($this->status)->with('goods_sku')->take(10)->get();
+        return (new GoodsListCollection($list));
+    }
 }

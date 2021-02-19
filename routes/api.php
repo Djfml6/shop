@@ -218,9 +218,7 @@ Route::namespace('Seller')->prefix('Seller')->group(function(){
 
     
 });
-Route::get('test',function(){
-    echo 666;die;
-});
+
 /**
  * 
  * 
@@ -231,7 +229,7 @@ Route::namespace('Api')->group(function(){
 
     Route::post('auth/login','AuthController@login'); // 登陆
     Route::post('auth/register','AuthController@register'); // 注册
-    Route::get('auth/send_sms','AuthController@send_sms'); // 发送短信
+    Route::post('auth/send_sms','AuthController@send_sms'); // 发送短信
     Route::post('auth/forget_password','AuthController@forget_password'); // 忘记密码
     Route::get('auth/logout','AuthController@logout'); // 退出账号
     Route::get('auth/check_login','AuthController@check_login'); // 检测登陆
@@ -246,7 +244,7 @@ Route::namespace('Api')->group(function(){
     // 获取商品栏目
     Route::get('goods_cate','GoodsCateController@index'); 
 
-    // PC端首页
+    // 首页
     Route::get('/index','IndexController@index'); 
 
     // 商品

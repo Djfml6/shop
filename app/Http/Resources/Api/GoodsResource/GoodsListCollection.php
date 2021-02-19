@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Home\GoodsResource;
+namespace App\Http\Resources\Api\GoodsResource;
 
 use App\Traits\HelperTrait;
 use Illuminate\Http\Resources\Json\ResourceCollection;
@@ -16,7 +16,6 @@ class GoodsListCollection extends ResourceCollection
     use HelperTrait;
     public function toArray($request)
     {
-         
         return $this->collection->map(function($item){
             $goods_price = $item->goods_price;
             $goods_market_price = $item->goods_market_price;
@@ -40,7 +39,7 @@ class GoodsListCollection extends ResourceCollection
                 'goods_market_price'    =>  $goods_market_price,
                 'goods_stock'           =>  $goods_stock,
                 'goods_sale'            =>  $item->goods_sale,
-                'goods_master_image'    =>  $this->thumb($item->goods_master_image),
+                'goods_master_image'    =>  $item->goods_master_image,
             ];
         });
         

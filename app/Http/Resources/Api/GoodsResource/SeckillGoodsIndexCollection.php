@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources\Home\GoodsResource;
+namespace App\Http\Resources\Api\GoodsResource;
 
 use App\Traits\HelperTrait;
 use Illuminate\Http\Resources\Json\ResourceCollection;

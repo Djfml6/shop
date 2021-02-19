@@ -65,7 +65,7 @@ class AuthController extends Controller
      */
     public function send_sms(VerificationCodeRequest $request){
         $sms_service = new SmsService();
-        $rs = $sms_service->sendSms($request->mobile, $request->type);
+        $info = $sms_service->sendSms($request->mobile, $request->type);
         return $this->success();
     }
 

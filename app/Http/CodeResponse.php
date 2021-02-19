@@ -12,13 +12,13 @@ class CodeResponse
 
 	const SUCESS = [200, '操作成功'];
 	const FAIL = [-1, '操作失败'];
-	const LOGIN_INVALID = [-101, '登录失败'];
+	const LOGIN_INVALID = [101, '登录失败'];
 
-	const TOKEN_INVALID = [400001, 'token无效'];
+	const TOKEN_INVALID = [101, 'token无效'];
+    const USER_INVALID = [101, '账号密码不对'];
 	const VALIDATION_ERROR = [400101, '参数错误'];
 	const REGISTER_CAPTCHA_ERROR = [400102, '验证码超时'];
 	const NO_GATEWAY_AVAILABLE = [400103, '短信发送异常'];
-    const USER_INVALID = [400105, '账号密码不对'];
     const REGISTER_INVALID = [400105, '注册异常'];
     const REQUEST_INVALID = [400107, '请求参数不合法'];
     const ACTION_UNAUTHORIZED = [400108, '没有操作权限'];

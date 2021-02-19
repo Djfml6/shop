@@ -19,7 +19,7 @@ class GoodsCateService extends BaseService{
     // 获取一级栏目下所有商品信息 is_matser = 1  $goods_num ,获取数量
     public function is_master($goods_num = 6){
         $goods_model = new Goods();
-        $goods_class_list = $this->getGoodsCate()['data'];
+        $goods_class_list = $this->getGoodsCate();
         $class_goods = [];
         foreach($goods_class_list as $k=>$v){
             $class_goods[$k]['name'] = $v['name'];
@@ -45,7 +45,7 @@ class GoodsCateService extends BaseService{
             unset($v['class_id']);
         }
 
-        return $this->format($class_goods);
+        return $class_goods;
     }
 
     // 根据商品ID 获取分类信息
