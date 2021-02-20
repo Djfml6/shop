@@ -166,7 +166,10 @@ class OrderCommentService extends BaseService{
         if(request('is_type') == Constant::COMMENT_TYPE_BAD){
             $oc_model = $oc_model->having('sum_rate','<=',10);
         }
-        $list = $oc_model->paginate(request()->per_page ?? 30);
+        if(request('is_type') == Constant::COMMENT_TYPE_IMG){
+            $oc_model = $oc_model->whereRaw('image != ""');
+        }
+        $list = $oc_model->paginate(request()->per_page ?? 4);
         
         return $list;
     }
@@ -177,16 +180,18 @@ class OrderCommentService extends BaseService{
         $oc_model2 = new OrderComment();
         $oc_model3 = new OrderComment();
         $oc_model4 = new OrderComment();
+        $oc_model5 = new OrderComment();
         $oc_model4 = $oc_model4->where('goods_id',$goods_id)->count();
-
         $oc_model = $oc_model->whereRaw('(score+agree+speed+service)>=15')->where('goods_id',$goods_id)->count();
         $oc_model2 = $oc_model2->whereRaw('(score+agree+speed+service)<15')->whereRaw('(score+agree+speed+service)>10')->where('goods_id',$goods_id)->count();
         $oc_model3 = $oc_model3->whereRaw('(score+agree+speed+service)<=10')->where('goods_id',$goods_id)->count();
+        $oc_model5 = $oc_model5->whereRaw('image != ""')->where('goods_id',$goods_id)->count();
         return [
-            'all' => $oc_model4,
+            'all' => $oc_model4??0,
             'good' => $oc_model??0,
             'commonly' => $oc_model2??0,
             'bad' => $oc_model3??0,
+            'img' => $oc_model5??0,
             'rate' => $oc_model4 == 0?100:round((($oc_model??0)/$oc_model4)*100,2),
         ];
     }

@@ -9,6 +9,9 @@ class Coupon extends BaseModel
 {
     protected $dates = ['start_time','end_time'];
     protected $appends = ['money_desc', 'range_desc'];
+    protected $casts = [
+        'money' => 'float'
+    ];
 
     public function store()
     {
@@ -22,7 +25,8 @@ class Coupon extends BaseModel
     			return $this->money.'元';
     			break;
     		case Constant::COUPON_TYPE_PERCENT:
-    			return '打'.($this->money/10).'折,最多优惠'.$this->discount_to_many.'元';
+    			// return '打'.($this->money/10).'折,最多优惠'.$this->discount_to_many.'元';
+                return ($this->money/10).'折';
     			break;
     		case Constant::COUPON_TYPE_SILL:
     			return $this->money.'元';

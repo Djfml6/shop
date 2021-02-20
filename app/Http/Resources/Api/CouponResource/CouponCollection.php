@@ -18,7 +18,6 @@ class CouponCollection extends JsonResource
             return [
                 'id'                        =>  $item->id,
                 'money'                     =>  intval($item->money),
-                'use_money'                 =>  intval($item->use_money),
                 'name'                      =>  $item->name,
                 'content'                   =>  $item->content,
             ];

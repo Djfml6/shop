@@ -23,9 +23,10 @@ class Constant
 
 
     // comment
-    const COMMENT_TYPE_GOODS = 1;
-    const COMMENT_TYPE_MIDDLE = 2;
-    const COMMENT_TYPE_BAD = 3;
+    const COMMENT_TYPE_GOODS = 1; //好评
+    const COMMENT_TYPE_MIDDLE = 2; //中评
+    const COMMENT_TYPE_BAD = 3; //差评
+    const COMMENT_TYPE_IMG = 4; //晒图
 
     // orders
     const ORDER_STATUS_CANCLE = 0; //取消

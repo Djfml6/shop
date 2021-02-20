@@ -283,33 +283,80 @@ class GoodsService extends BaseService{
         
         // 获取处理后的规格信息
         $sku = $goods_skus_model->where('goods_id',$id)->get()->toArray();
-
+        $init_choose_attr = [];
         if(!empty($sku)){
             $skuList = [];
             $spec_id = [];
+            $init_choose_attr = explode(',', $sku[0]['spec_id']); //默认初始化选中的属性
+            $init_choose_attrname = explode(',', $sku[0]['sku_name']); //默认初始化选中的属性名称
             foreach($sku as $v){
                 $v['spec_id'] = explode(',',$v['spec_id']);
-                $v['sku_name'] = explode(',',$v['sku_name']);
                 $spec_id = array_merge($spec_id,$v['spec_id']);
-                $skuList[] = $v;
             }
-
-
-            $spec_id = array_unique($spec_id);      
-            $attr_id = $goods_spec_model->whereIn('id',$spec_id)->orderBy('id','desc')->get()->pluck('attr_id')->unique()->toArray();
-
-
-            $goods_attr = $goods_attr_model->whereIn('id',$attr_id)->with('specs')->orderBy('id','desc')->get()->toArray();
+            $init_nothing_spec = array_unique($spec_id);
+            $goods_attr = $goods_spec_model->whereIn('id', $init_choose_attr)->with(['attr','self'])->get()->map(function($v, $k) use($init_choose_attr, $init_nothing_spec) {
+                    return [
+                        'id'       => $v['attr']['id'],
+                        'store_id' => $v['attr']['store_id'],
+                        'name'     => $v['attr']['name'],
+                        'specs'    => $v['self']->map(function($v1, $k1) use($init_choose_attr, $init_nothing_spec) {
+                                        if(in_array($v1['id'], $init_choose_attr))
+                                        {
+                                            $v1['active'] = true;
+                                        }else{
+                                            $v1['active'] = false;
+                                        }
+                                        if(in_array($v1['id'], $init_nothing_spec))
+                                        {
+                                            $v1['nothing'] = false;
+                                        }else{
+                                            $v1['nothing'] = true;
+                                        }
+                                        return $v1;
+                                    })->toArray()
+                    ];
+            })->toArray();
+            // dd($init_choose_attrname);
+            $goods_info['init_choose_attr'] = $init_choose_attr;
+            $goods_info['init_choose_attrname'] = $init_choose_attrname;
             $goods_info['goods_price'] = $sku[0]['goods_price'];
-            $goods_info['goods_price'] = $sku[0]['goods_stock'];
+            $goods_info['goods_stock'] = $sku[0]['goods_stock'];
             $goods_info['attrList'] = $goods_attr;
-            $goods_info['skuList'] = $skuList;
         }
 
         $goods_cate_service = new GoodsCateService;
         $goods_info['goods_cate'] = $goods_cate_service->getGoodsCateByGoodsId($id);
       
         return $goods_info;
+    }
+
+    // 切换属性价格和库存
+    public function changeAttr()
+    {
+        $spec_id = request()->spec_id;
+        $goods_id = request()->goods_id;
+        if(!isset($spec_id) || !isset($goods_id))
+        {
+            throw new RequestException(CodeResponse::VALIDATION_ERROR);
+        }
+        $goods_model = new Goods;
+        $goods_info = $goods_model->where($this->status)->find($goods_id);
+        if(!$goods_info)
+        {
+            throw new RequestException(CodeResponse::GOODS_INVALID);
+        }
+
+        $goods_skus_info = $goods_info->goods_skus()->select(DB::raw('id,spec_id,goods_price,goods_market_price,goods_stock,sku_name'))->where('spec_id', implode(',', $spec_id))->first()->toArray();
+        if(!$goods_skus_info)
+        {
+            throw new RequestException(CodeResponse::GOODS_INVALID);
+        }
+        if($goods_skus_info['goods_stock'] <= 0)
+        {
+            throw new RequestException(CodeResponse::GOODS_STOCK_INVALID);
+        }
+        $goods_skus_info['init_choose_attrname'] = explode(',', $goods_skus_info['sku_name']);
+        return $goods_skus_info;
     }
 
     // 获取统计数据

@@ -114,9 +114,9 @@ class CouponService extends BaseService{
     }
 
     // 获取所有可领取的优惠券列表
-    public function getCoupon()
+    public function getCoupon($field = '*')
     {
-        $info = Coupon::query()->where('status', Constant::COUPON_STATUS_NORMAL)->with(['store' => function($query){
+        $info = Coupon::query()->select(DB::raw($field))->where('status', Constant::COUPON_STATUS_NORMAL)->with(['store' => function($query){
              $query->select('id', 'store_name');
         }])->get();
         return $info;

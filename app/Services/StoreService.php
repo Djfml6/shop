@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\CodeResponse;
 use App\Exceptions\RequestException;
 use App\Http\Constant;
+use App\Models\Goods;
 
 class StoreService extends BaseService{
 
@@ -31,8 +32,11 @@ class StoreService extends BaseService{
 
     }
 
-
-
+    // 获取店铺商品总数
+    public function getStoreGoodsCount($store_id)
+    {
+        return Goods::query()->where(['store_id' => $store_id, 'goods_status' => true, 'goods_verify' => 1])->count();
+    }
 
     // 入驻时获取店铺状态
     public function getStoreVerify($auth='user'){
@@ -86,8 +90,10 @@ class StoreService extends BaseService{
             DB::raw('avg(speed) as speedAll'),
         ])->toArray();
         foreach($info as &$v){
-            $v = intval($v);
+            $v = round($v, 2);
         }
+        // 获得店铺全部商品数
+        $store_info['goods_count'] = $this->getStoreGoodsCount($store_id);
         $store_info['rate'] = $info;
         return $store_info;
     }
@@ -258,7 +264,6 @@ class StoreService extends BaseService{
         return $this->format([],__('base.success'));
         
     }
-
 
     // 编辑店铺状态
     public function editStoreStatus($store_id,$data = []){

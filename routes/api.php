@@ -252,6 +252,7 @@ Route::namespace('Api')->group(function(){
     Route::get('goods/comment_count/{id}','GoodsController@comment_count'); // 获取商品评论统计
     Route::get('goods/comments/{id}','GoodsController@comment'); // 获取商品评论列表
     Route::post('goods/search','GoodsController@search'); // 搜索商品列表
+    Route::post('goods/attr', 'GoodsController@attr'); //切换属性价格和库存
 
     // 店铺列表
     Route::get('store','StoreController@index'); // 首页店铺列表

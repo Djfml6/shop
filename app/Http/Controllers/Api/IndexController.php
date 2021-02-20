@@ -6,17 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Services\AdvService;
 use App\Services\GoodsService;
 use App\Services\SeckillService;
+use App\Services\CouponService;
 use Illuminate\Http\Request;
 
 class IndexController extends Controller
 {
     // 获取首页信息
-    public function index(GoodsService $goods_service,AdvService $adv_service,SeckillService $seckill_service){
-        $data['goods'] = $goods_service->getHomeMasterGoods(); // 获取首页主推商品
-        // $data['banner_bottom_adv'] = $adv_service->getAdvList('PC_幻灯片下广告')['data'];
-        // $data['banner'] = $adv_service->getAdvList('PC_首页幻灯片')['data'];
+    public function index(GoodsService $goods_service,AdvService $adv_service,SeckillService $seckill_service,CouponService $coupon_service){
+        $info['goods'] = $goods_service->getHomeMasterGoods(); // 获取首页主推商品
+
+        // dd($info);
+        $info['coupons'] = $coupon_service->getCoupon('id,name,money,type');
+        $info['banners'] = $adv_service->getAdvList('API_首页Banner');
+        $info['test'] = ['dj' => '666', 'child' => ['n1' => 'q','n2' => 'qq'], 'fml' => '777','djfml' => '888'];      
+        // dd($info);  
+        // $info->test = 666;
         // $data['seckill_list'] = $seckill_service->getIndexSeckillAndGoods(4)['data'];
-        // dd($data);
-        return $this->success($data);
+        return $this->success($info);
     }
 }
