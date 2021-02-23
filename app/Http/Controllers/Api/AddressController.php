@@ -30,14 +30,20 @@ class AddressController extends Controller
      */
     public function store(AddressRequest $request, UserService $user_service)
     {
-        $info = $user_service->getUserInfo()->address()->create($request->only([
-            'consignee', 'country', 'province', 'city', 'district', 'address_detail', 'mobile', 'house_number'
-        ]));
+
+        $user = $user_service->getUserInfo();
+        $info = $user->address()->create($request->only([
+            'consignee', 'country_id', 'province_id', 'city_id', 'district_id', 'address_detail', 'mobile', 'area_info', 'is_default']));
         if(!$info)
         {
             return $this->fail();
         }
-        return $this->success($info);
+        if($info->is_default == true)
+        {
+            $address_model = new Address;
+            $address_model->where('user_id', $user->id)->where('id', '!=', $info->id)->update(['is_default' => false]);
+        }
+        return $this->success([]);
     }
 
     /**
@@ -48,7 +54,7 @@ class AddressController extends Controller
      */
     public function show(UserService $user_service, $id)
     {
-        $info = $user_service->getUserInfo()->address()->where('id', $id)->first();
+        $info = $user_service->getUserInfo()->address()->where('id', $id)->with(['province', 'city', 'district'])->first();
         return $this->success($info);
     }
 
@@ -64,9 +70,14 @@ class AddressController extends Controller
         $address = Address::query()->find($id);
         $this->authorize('own', $address);
         $info = $address->update($request->only([
-            'consignee', 'country', 'province', 'city', 'district', 'address_detail', 'mobile', 'house_number'
+            'consignee', 'country_id', 'province_id', 'city_id', 'district_id', 'address_detail', 'mobile', 'area_info', 'is_default'
         ]));
-        return $info? $this->success() : $this->fail();
+        if($request->is_default == true)
+        {
+            $address_model = new Address;
+            $address_model->where('user_id', $user_service->getUserInfo()->id)->where('id', '!=', $id)->update(['is_default' => false]);
+        }
+        return $info ? $this->success() : $this->fail();
     }
 
     /**
@@ -100,10 +111,14 @@ class AddressController extends Controller
         return $this->success();
     }
 
-    // 获取默认地址
+    // 获取默认地址如果没有设置默认地址则取靠前的第一条
     public function get_default(Request $request, UserService $user_service){
-        $address = $user_service->getUserInfo()->address()->where('is_default' , true)->first();
-
+        $address_model = $user_service->getUserInfo()->address();
+        $address = $address_model->where('is_default' , true)->with(['province', 'city', 'district'])->first();
+        if(!$address)
+        {
+            $address = $user_service->getUserInfo()->address()->with(['province', 'city', 'district'])->first();
+        }
         return $this->success($address);
     }
 }

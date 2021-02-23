@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cart extends BaseModel
 {
+    protected $casts = [
+        'checked' => 'boolean'
+    ];
     public function goods(){
         return $this->hasOne(Goods::class,'id','goods_id');
     }

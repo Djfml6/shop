@@ -75,8 +75,9 @@ class FavoriteService extends BaseService{
     }
 
     // 判断是否有收藏
-    public function isFav($out_id){
-        if(!in_array(request()->type,[Constant::FAVORITES_TYPE_GOODS, Constant::FAVORITES_TYPE_STORE])){
+    public function isFav($out_id, $type = ''){
+        $type = $type ?? request()->type;
+        if(!in_array($type,[Constant::FAVORITES_TYPE_GOODS, Constant::FAVORITES_TYPE_STORE])){
             throw new RequestException(CodeResponse::VALIDATION_ERROR);
         }
 
@@ -84,7 +85,7 @@ class FavoriteService extends BaseService{
         $user_info = $user_service->getUserInfo();
 
         $fav_model = new Favorite();
-        $fav_info = $fav_model->where(['user_id' => $user_info['id'], 'out_id' => $out_id, 'is_type' => request()->type])->first();
+        $fav_info = $fav_model->where(['user_id' => $user_info['id'], 'out_id' => $out_id, 'is_type' => $type])->first();
         if(empty($fav_info)){
             return false;
         }

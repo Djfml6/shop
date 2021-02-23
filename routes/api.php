@@ -265,6 +265,8 @@ Route::namespace('Api')->group(function(){
     Route::get('integral/goods_class','IntegralController@get_integral_class'); // 积分商品分类
     Route::post('integral/search','IntegralController@search'); // 搜索展示积分商品列表
 
+    Route::get('coupons/index','CouponController@index'); //商城的优惠券列表
+    
     // 收藏/关注
     Route::get('/favorites/{id}','FavoriteController@show');
 
@@ -275,10 +277,11 @@ Route::namespace('Api')->group(function(){
         // 购物车
         Route::apiResource('carts','CartController')->except(['show']);
         Route::get('carts/count','CartController@count'); // 获取购物车商品数量
+        Route::post('carts/checked','CartController@checked'); // 购物车状态选中(反选、正选)
+        Route::post('carts/check_all','CartController@check_all'); // 购物车状态选中(全选、全不选)
 
         // 优惠券
         Route::get('coupons/my','CouponController@my'); // 自己的优惠券列表
-        Route::get('coupons/index','CouponController@index'); //商城的优惠券列表
         Route::post('coupons/receive','CouponController@receive_coupon'); // 领取优惠券
 
         // 用户收货地址

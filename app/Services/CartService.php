@@ -34,6 +34,7 @@ class CartService extends BaseService{
                                 }])
                                 ->groupBy('store_id')
                                 ->paginate(request()->per_page ?? 30);
+        // return (new CartCollection($cart_list))->keyBy('store_id');
         return new CartCollection($cart_list);
     }
 
@@ -41,7 +42,7 @@ class CartService extends BaseService{
     public function getCount(){
         $user_service = new UserService;
         $user_info = $user_service->getUserInfo();
-        $cart_count = Cart::query()->where(['user_id' => $user_info['id']])->count();
+        $cart_count = Cart::query()->where(['user_id' => $user_info['id']])->sum('buy_num');
         return $cart_count;
     }
 
@@ -109,7 +110,6 @@ class CartService extends BaseService{
 
     // 修改购物车状态
     public function editCart($id){
-        $type = request()->type ?? Constant::CART_TOOL_DELETE;
         $buy_num = request()->buy_num;
 
         // 获取当前用户user_id
@@ -124,32 +124,59 @@ class CartService extends BaseService{
         ])->first();
 
         if(empty($cart_info)){
-            throw new RequestException(CodeResponse::VALIDATION_ERROR, '操作选项不存在');
-            
+            throw new RequestException(CodeResponse::VALIDATION_ERROR, '不存在此商品');
         }
-
-        // 判断是否修改数量大于0
-        if($buy_num > 1){
-            $cart_info->buy_num = $buy_num;
-            $cart_info->save();
-            return [];
-        }
-
-        // 判断是增加还是减少
-        if($type == Constant::CART_TOOL_DELETE){
-            if($cart_info->buy_num <= 1){
-                $cart_model->where('user_id',$user_info['id'])->where('id',$id)->delete();
-            }else{
-                $cart_info->buy_num -= 1; // 加减购物车只能为1
-                $cart_info->save();
-            }
-            return [];
-        }else{
-            $cart_info->buy_num += 1; // 加减购物车只能为1
-            $cart_info->save();
-            return [];
-        }
+        $cart_info->buy_num = $buy_num;
+        $cart_info->save();
     }
 
+    // 统计XX店铺下购物车商品种类sku
+    public function getCountByStore($store_id, $user_id)
+    {
+        return Cart::query()->where(['store_id' => $store_id, 'user_id' => $user_id])->sum('buy_num');
+    }
+
+    // 根据用户的购物车已经是checked获得数据
+    public function getCartsByIds($user_id, $field = '*')
+    {
+        $res = Cart::query()->where('checked', true)->whereUserId($user_id)->select(DB::raw($field))->get()->toArray();
+        return $res;
+    }
+
+    public function checked()
+    {
+        if(!isset(request()->id))
+        {
+            throw new RequestException(CodeResponse::VALIDATION_ERROR);
+        }
+        $cart_model = Cart::find(request()->id);
+        if(!$cart_model)
+        {
+            throw new RequestException(CodeResponse::VALIDATION_ERROR, '不存在此商品');
+        }
+        $cart_model->checked = !$cart_model->checked;
+        $cart_model->save();
+        return true;
+    }
+
+    public function checkAll()
+    {
+        $type = request()->type;
+        if(!isset($type) || !in_Array($type, [Constant::CART_TOOL_PITCH,Constant::CART_TOOL_CANCEL]))
+        {
+            throw new RequestException(CodeResponse::VALIDATION_ERROR);
+        }
+        $user_service = new UserService();
+        $user = $user_service->getUserInfo();
+
+        if($type == Constant::CART_TOOL_PITCH)
+        {
+            $cart_model = Cart::query()->where('user_id', $user->id)->update(['checked' => true]);
+            return true;
+        }
+
+        $cart_model = Cart::query()->where('user_id', $user->id)->update(['checked' => false]);
+        return true;
+    }
     
 }

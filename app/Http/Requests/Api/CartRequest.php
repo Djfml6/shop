@@ -18,7 +18,6 @@ class CartRequest extends BaseRequest
         switch ($this->method()) {
             case 'PUT':
                 return [
-                    'type' => [Rule::in([Constant::CART_TOOL_DELETE,Constant::CART_TOOL_ADD])],
                     'buy_num' => 'required|integer|min:1'
                 ];
                 break;

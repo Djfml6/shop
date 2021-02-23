@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class CouponLog extends BaseModel
 {
@@ -18,5 +19,12 @@ class CouponLog extends BaseModel
     {
     	return $this->belongsTo(Coupon::class);
     }
-
+    public function getStartTimeAttribute($value)
+    {
+        return Carbon::parse($value)->toDateString();
+    }
+    public function getEndTimeAttribute($value)
+    {
+        return Carbon::parse($value)->toDateString();
+    }
 }

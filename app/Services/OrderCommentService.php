@@ -169,7 +169,7 @@ class OrderCommentService extends BaseService{
         if(request('is_type') == Constant::COMMENT_TYPE_IMG){
             $oc_model = $oc_model->whereRaw('image != ""');
         }
-        $list = $oc_model->paginate(request()->per_page ?? 4);
+        $list = $oc_model->paginate(request()->per_page ?? 5);
         
         return $list;
     }

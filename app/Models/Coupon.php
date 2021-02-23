@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Coupon extends BaseModel
 {
     protected $dates = ['start_time','end_time'];
-    protected $appends = ['money_desc', 'range_desc'];
+    protected $appends = ['money_desc', 'range_desc', 'min_money_desc'];
     protected $casts = [
         'money' => 'float'
     ];
@@ -16,6 +16,11 @@ class Coupon extends BaseModel
     public function store()
     {
     	return $this->hasOne(Store::class, 'id', 'store_id');
+    }
+
+    public function coupon_log()
+    {
+        return $this->hasMany(CouponLog::class);
     }
 
     public function getMoneyDescAttribute()
@@ -35,6 +40,11 @@ class Coupon extends BaseModel
     			# code...
     			break;
     	}
+    }
+
+    public function getMinMoneyDescAttribute()
+    {
+        return "满".$this->min_money."元使用";
     }
 
     public function getRangeDescAttribute()

@@ -229,7 +229,12 @@ class UserService extends BaseService{
             return auth($auth)->user();
         }
         throw new RequestException(CodeResponse::USER_INVALID);
-        
+    }
+
+    // 检测登录状态
+    public function isLogin($auth = 'api')
+    {
+        return auth($auth)->user() ?? false;
     }
 
     // 检测用户是否登陆

@@ -584,10 +584,18 @@ class OrderService extends BaseService{
         $goods_model = new Goods();
         $goods_sku_model = new GoodsSku();
         $user_service = new UserService();
+        $cart_service = new CartService();
         $user_info = $user_service->getUserInfo();
-
         $list = [];
         $this->cartId = []; // 购物车ID 初始化
+        $res = $cart_service->getCartsByIds($user_info->id, 'id as cart_id,user_id,goods_id,sku_id,store_id,buy_num');
+        if(!$res)
+        {
+            throw new RequestException(CodeResponse::VALIDATION_ERROR);
+            
+        }
+        $params['order'] = $res;
+
         foreach($params['order'] as $v){
             $data = [];
             $data = $goods_model->with(['store' => function($q){
@@ -612,7 +620,7 @@ class OrderService extends BaseService{
                 $data['goods_weight'] = $goods_sku['goods_weight'];
             }
 
-            $data['goods_master_image'] = $this->thumb($data['goods_master_image'],150);
+            $data['goods_master_image'] = $data['goods_master_image'];
             $data['total'] = round($v['buy_num'] * $data['goods_price'],2);
             $data['total_weight'] = round($v['buy_num']*$data['goods_weight'],2);
             // 判断是否是团购
@@ -639,15 +647,14 @@ class OrderService extends BaseService{
                 $this->cartId[] = $v['cart_id'];
             }
         }
-
         $lists['order'] = $list;
+
         // 循环查看优惠券是否可用 并且计算出当前可用的优惠券优惠的价钱
         $coupon_log_model = new CouponLog();
         $lists['coupon_id'] = [];
         $lists['coupons'] = [];
-
         foreach($lists['order'] as $k => &$v){
-            $coupon_list = $coupon_log_model->with('coupon')->where('user_id', $user_info['id'])->where('store_id', $k)->where('status', Constant::COUPON_STATUS_NOT_USED)->get();
+            $coupon_list = $coupon_log_model->with('coupon')->where('user_id', $user_info['id'])->where('store_id', $k)->with(['store'=>function($query){$query->select(['id','store_name']);}])->where('status', Constant::COUPON_STATUS_NOT_USED)->get();
             if(!$coupon_list->isEmpty()){
                 foreach ($coupon_list as $key => &$value) {
                     if(now()->lt($value['start_time']) || now()->gt($value['end_time']))
@@ -726,7 +733,9 @@ class OrderService extends BaseService{
 
             }          
         }
+
         $lists['coupons'] = collect($lists['coupons'])->collapse()->toArray();
+        $lists['order'] = collect($lists['order'])->values();
         return $lists;    
     }
 

@@ -37,7 +37,6 @@ class CartController extends Controller
         $idArray = array_filter(explode(',',$id),function($item){
             return is_numeric($item);
         });
-
         // 获取当前用户user_id
         $user_service = new UserService;
         $user_info = $user_service->getUserInfo();
@@ -52,4 +51,19 @@ class CartController extends Controller
         $info = $cart_service->getCount();
         return $this->success($info);
     }
+
+    // 购物车状态选中(反选、正选)
+    public function checked(CartService $cart_service)
+    {
+        $cart_service->checked();
+        return $this->success([]);
+    }
+
+    // 购物车状态选中(全选、全不选)
+    public function check_all(CartService $cart_service)
+    {
+        $cart_service->checkAll();
+        return $this->success([]);
+    }
+
 }

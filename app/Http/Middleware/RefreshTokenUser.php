@@ -50,7 +50,7 @@ class RefreshTokenUser extends BaseMiddleware
                     throw new RequestException(CodeResponse::LOGIN_INVALID, $e->getMessage());
                 }
         }catch(TokenInvalidException $e){
-            return response()->json(['code'=>401,'msg'=>__('auth.error_token')]);
+            throw new RequestException(CodeResponse::TOKEN_INVALID, 'token失效');
         }catch (JWTException $e)
         {
             throw new RequestException(CodeResponse::TOKEN_INVALID, 'token失效');

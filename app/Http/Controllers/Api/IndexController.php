@@ -16,7 +16,7 @@ class IndexController extends Controller
         $info['goods'] = $goods_service->getHomeMasterGoods(); // 获取首页主推商品
 
         // dd($info);
-        $info['coupons'] = $coupon_service->getCoupon('id,name,money,type');
+        $info['coupons'] = $coupon_service->getCoupon(false ,'id,name,money,type');
         $info['banners'] = $adv_service->getAdvList('API_首页Banner');
         $info['test'] = ['dj' => '666', 'child' => ['n1' => 'q','n2' => 'qq'], 'fml' => '777','djfml' => '888'];      
         // dd($info);  

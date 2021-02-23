@@ -283,10 +283,13 @@ class GoodsService extends BaseService{
         
         // 获取处理后的规格信息
         $sku = $goods_skus_model->where('goods_id',$id)->get()->toArray();
-        $init_choose_attr = [];
         if(!empty($sku)){
             $skuList = [];
             $spec_id = [];
+            $goods_info['init_choose_attr'] = [];
+            $goods_info['init_choose_attrname'] = [];
+            $goods_info['attrList'] = [];
+            $goods_info['init_choose_skuid'] = 0;
             $init_choose_attr = explode(',', $sku[0]['spec_id']); //默认初始化选中的属性
             $init_choose_attrname = explode(',', $sku[0]['sku_name']); //默认初始化选中的属性名称
             foreach($sku as $v){
@@ -316,14 +319,13 @@ class GoodsService extends BaseService{
                                     })->toArray()
                     ];
             })->toArray();
-            // dd($init_choose_attrname);
             $goods_info['init_choose_attr'] = $init_choose_attr;
             $goods_info['init_choose_attrname'] = $init_choose_attrname;
             $goods_info['goods_price'] = $sku[0]['goods_price'];
             $goods_info['goods_stock'] = $sku[0]['goods_stock'];
+            $goods_info['init_choose_skuid'] = $sku[0]['id'];
             $goods_info['attrList'] = $goods_attr;
         }
-
         $goods_cate_service = new GoodsCateService;
         $goods_info['goods_cate'] = $goods_cate_service->getGoodsCateByGoodsId($id);
       
@@ -346,7 +348,7 @@ class GoodsService extends BaseService{
             throw new RequestException(CodeResponse::GOODS_INVALID);
         }
 
-        $goods_skus_info = $goods_info->goods_skus()->select(DB::raw('id,spec_id,goods_price,goods_market_price,goods_stock,sku_name'))->where('spec_id', implode(',', $spec_id))->first()->toArray();
+        $goods_skus_info = $goods_info->goods_skus()->select(DB::raw('id,spec_id,goods_price,goods_market_price,goods_stock,sku_name'))->where('spec_id', implode(',', $spec_id))->first();
         if(!$goods_skus_info)
         {
             throw new RequestException(CodeResponse::GOODS_INVALID);
@@ -356,6 +358,7 @@ class GoodsService extends BaseService{
             throw new RequestException(CodeResponse::GOODS_STOCK_INVALID);
         }
         $goods_skus_info['init_choose_attrname'] = explode(',', $goods_skus_info['sku_name']);
+        $goods_skus_info['init_choose_skuid'] = $goods_skus_info['id'];
         return $goods_skus_info;
     }
 

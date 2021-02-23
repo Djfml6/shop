@@ -101,24 +101,44 @@ class CouponService extends BaseService{
         return $this->format([]);
     }
 
-    // 根据店铺ID 获取优惠券 列表
-    public function getCouponByStoreId($store_id)
+    // 获取可领取的优惠券 列表,,,如果用户已经登录，则在可领取的优惠列表中判断是否已经领取过或达到上限
+    public function getCoupon($store_id = false, $field = '*')
     {
-        $list = Coupon::query()->where('store_id',$store_id)->where('stock','>',0)->where('start_time','<',now())->where('end_time','>',now())->get();
+        $user_service = new UserService();
+        $user = $user_service->isLogin();
+        // $user = \App\Models\User::find(26);
 
+        $list = Coupon::query()->where('status', Constant::COUPON_STATUS_NORMAL)
+        ->select(DB::raw($field))
+        ->where('stock','>',0)
+        ->where('end_time','>',now())
+        ->when($store_id, function($query)use($store_id){
+                $query->where('store_id', $store_id);
+        })
+        ->when($user, function($query)use($user){
+                $query->with(['coupon_log' => function($query)use($user){
+                    $query->where('user_id', $user->id)->select(DB::raw('id, coupon_id, user_id'));
+                }]);
+        })
+        ->with(['store' => function($query){
+             $query->select('id', 'store_name');
+        }])
+        ->get();
         if($list->isEmpty()){
             return [];
         }
+        $list = $list->map(function($v, $i) use($user){
+            if($user)
+            {
+                $num = $v['coupon_log']->count();
+                $v['is_receive'] = $num >= $v->count ? false : true;                
+            }else{
+                $v['is_receive'] = true;
+            }
 
+            return $v;
+        });
         return $list;
     }
 
-    // 获取所有可领取的优惠券列表
-    public function getCoupon($field = '*')
-    {
-        $info = Coupon::query()->select(DB::raw($field))->where('status', Constant::COUPON_STATUS_NORMAL)->with(['store' => function($query){
-             $query->select('id', 'store_name');
-        }])->get();
-        return $info;
-    }
 }

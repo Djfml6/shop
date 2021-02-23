@@ -47,6 +47,8 @@ class Constant
     // cart
     const CART_TOOL_DELETE = 0; //数量减少
     const CART_TOOL_ADD = 1; //数量增加
+    const CART_TOOL_PITCH = 'pitch'; //全选
+    const CART_TOOL_CANCEL = 'cancel'; //反选
 
     // coupon
     const COUPON_TYPE_FIXED = 0; //满减券
