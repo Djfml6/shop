@@ -738,7 +738,8 @@ class OrderService extends BaseService{
             }          
         }
 
-        $lists['coupons'] = collect($lists['coupons'])->collapse()->groupBy('store_id')->values()->toArray();
+        // $lists['coupons'] = collect($lists['coupons'])->collapse()->groupBy('store_id')->values()->toArray();
+        $lists['coupons'] = collect($lists['coupons'])->collapse()->toArray();
         $lists['order'] = collect($lists['order'])->values();
         return $lists;    
     }
