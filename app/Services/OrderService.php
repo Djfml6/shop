@@ -655,9 +655,9 @@ class OrderService extends BaseService{
         $lists['coupons'] = [];
         foreach($lists['order'] as $k => &$v){
             $coupon_list = $coupon_log_model->with('coupon')->where('user_id', $user_info['id'])->where('store_id', $k)->with(['store'=>function($query){$query->select(['id','store_name']);}])->where('status', Constant::COUPON_STATUS_NOT_USED)->get();
-            $value['checked'] = false;
             if(!$coupon_list->isEmpty()){
                 foreach ($coupon_list as $key => &$value) {
+                    $value['checked'] = false;
                     if(now()->lt($value['start_time']) || now()->gt($value['end_time']))
                     {
                         $value['can'] = false;
