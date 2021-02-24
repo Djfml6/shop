@@ -679,7 +679,7 @@ class OrderService extends BaseService{
                                         $value['coupon_price'] = $value['coupon']['money'];
                                     }elseif($value['coupon']['type'] == Constant::COUPON_TYPE_PERCENT){
                                         $diff = $v['store_total_price'] - $v['store_total_price']*($value['coupon']['money']/100);
-                                        $value['coupon_price'] = $diff>=$value['coupon']['discount_to_many']?$value['coupon']['discount_to_many']:$diff;
+                                        $value['coupon_price'] = $diff>=$value['coupon']['discount_to_many']?round($value['coupon']['discount_to_many'],2):round($diff);
 
                                     }                                    
                                 }else{
@@ -706,7 +706,7 @@ class OrderService extends BaseService{
                                             $value['coupon_price'] = $value['coupon']['money'];
                                         }elseif($value['coupon']['type'] == Constant::COUPON_TYPE_PERCENT){
                                             $diff = $total-$total*($value['coupon']['money']/100);
-                                            $value['coupon_price'] = $diff>=$value['coupon']['discount_to_many']?$value['coupon']['discount_to_many']:$diff;
+                                            $value['coupon_price'] = $diff>=$value['coupon']['discount_to_many']?round($value['coupon']['discount_to_many'],2):round($diff);
                                         }
 
 
@@ -726,7 +726,7 @@ class OrderService extends BaseService{
                             $value['can'] = true;
                             $lists['coupon_id'][] = $value['id'];
                             $v['coupon_id'][] = $value['id'];
-                            $value['coupon_price'] = $value['coupon']['money'];
+                            $value['coupon_price'] = round($value['coupon']['money'],2);
                         break;
 
                         default:
