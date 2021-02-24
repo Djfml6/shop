@@ -660,6 +660,7 @@ class OrderService extends BaseService{
                     if(now()->lt($value['start_time']) || now()->gt($value['end_time']))
                     {
                         $value['can'] = false;
+                        $lists['not_coupon_id'][] = $value['id'];
                         continue;
                     }
                     switch ($value['coupon']['type']) {
@@ -682,6 +683,7 @@ class OrderService extends BaseService{
                                     }                                    
                                 }else{
                                     $value['can'] = false;
+                                    $lists['not_coupon_id'][] = $value['id'];
                                 }
 
                                 
@@ -709,9 +711,11 @@ class OrderService extends BaseService{
 
                                     }else{
                                         $value['can'] = false;
+                                        $lists['not_coupon_id'][] = $value['id'];
                                     }
                                 }else{
                                     $value['can'] = false;
+                                    $lists['not_coupon_id'][] = $value['id'];
                                 }                                
 
                             }
@@ -734,7 +738,7 @@ class OrderService extends BaseService{
             }          
         }
 
-        $lists['coupons'] = collect($lists['coupons'])->collapse()->toArray();
+        $lists['coupons'] = collect($lists['coupons'])->collapse()->groupBy('store_id')->values()->toArray();
         $lists['order'] = collect($lists['order'])->values();
         return $lists;    
     }
