@@ -43,6 +43,7 @@ class OrderCollection extends ResourceCollection
             'total'        => $this->total(), // 数据总数
             'per_page'     => $this->perPage(), // 每页数量
             'current_page' => $this->currentPage(), // 当前页码
+            'last_page' => $this->lastPage()
         ];
     }
 }

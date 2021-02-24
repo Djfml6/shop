@@ -31,9 +31,12 @@ class OrderResource extends JsonResource
             'freight_money'         =>  $this->freight_money,
             'remark'                =>  $this->remark,
             'pay_time'              =>  $this->pay_time,
+            'pay_price'             =>  $this->pay_price,
             'created_at'            =>  $this->created_at->format('Y-m-d H:i:s'),
             'order_status'          =>  $this->order_status,
             'order_status_cn'       =>  $this->order_status_cn,
+            'order_price'           =>  $this->order_price,
+            'coupon_money'          =>  $this->coupon_money,
             'delivery_list'         =>  empty($this->delivery_no)?[]:$kb_service->getExpressInfo($this->delivery_no, $this->delivery_code, $this->mobile),
             'order_goods'           =>  $this->order_goods->map(function($q){
                                         return [
@@ -45,6 +48,7 @@ class OrderResource extends JsonResource
                                             'buy_num'     => $q->buy_num,
                                         ];
             }),
+            'store_name'            =>  $this->store->store_name
         ];
     }
 }

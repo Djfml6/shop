@@ -33,6 +33,7 @@ class OrderService extends BaseService{
         $params = $this->base64Check();
         $info = $this->createOrderFormat($params);
         // 预先计算运费
+        $info['freight'] = 0;
         if(isset($params['address']))
         {
             $user_service = new UserService;
@@ -57,15 +58,14 @@ class OrderService extends BaseService{
 
 
         // 优惠券的处理
-        $coupon_id = json_decode(request()->coupon_id, true);
+        $coupon_id = $params['coupon_id'] ?? '';
 
         $user_service = new UserService;
         $user_info = $user_service->getUserInfo();
 
         // 地址验证
-        $address_info = $this->checkAddress($user_info->id);
+        $address_info = $this->checkAddress($user_info->id, $params['address_id']);
 
-        
         // 实例化订单表
         $order_model = new Order();
         $order_goods_model = new OrderGoods();
@@ -91,7 +91,7 @@ class OrderService extends BaseService{
                         'area'                      =>  $address_info['area_info'], // 收件人地区
                         'address_detail'            =>  $address_info['address_detail'], // 详细地址
                         'coupon_id'                 =>  0, 
-                        'remark'                    =>  request()->remark??'', // 备注
+                        'remark'                    =>  $params['remark'][$v['goods_list'][0]['store_id']]??'', // 备注
                     ];
 
                     
@@ -154,14 +154,17 @@ class OrderService extends BaseService{
                         {
                             throw new RequestException(CodeResponse::VALIDATION_ERROR);
                         }
-
+                        $use = array_values($use);
                         // 开始提取优惠券折扣金额
                         $r = collect($rs['coupons'])->where('id', $use[0])->first();
+
                         $coupon_money = $r['coupon_price'];
                         $cp = $coupon_log_model->find($use[0]);
                         $cp->status = 1;
-                        $cp->order_id = $order_info->id;
+                        $cp->order_id = $order_info->id;                       
                         $order_info->coupon_id = $use[0];
+                        $cp->save();                     
+
                     }
 
 
@@ -198,7 +201,7 @@ class OrderService extends BaseService{
                 // 执行成功则删除购物车
                 // $this->delCart();
             DB::commit();
-            return [];
+            return [ 'order_no' => $order_info->order_no ];
         }catch(\Exception $e){
             Log::channel('qwlog')->debug('createOrder:'.json_encode($e->getMessage()));
             DB::rollBack();
@@ -442,8 +445,8 @@ class OrderService extends BaseService{
     }
 
     // 地址验证
-    public function checkAddress($user_id){
-        $id = request()->address_id ?? 0;
+    public function checkAddress($user_id, $address_id){
+        $id = $address_id ?? 0;
         if(empty($id)){
             throw new RequestException(CodeResponse::VALIDATION_ERROR, '地址不存在');
         }
@@ -837,7 +840,7 @@ class OrderService extends BaseService{
         $order_no  = request()->order_no;// 订单号
         $group_log_id = request()->group_log_id;// 拼团订单ID查询
         $created_at = request()->created_at; // 下单时间
-        $order_status = request()->order_status;  
+        $type = request()->type;  
         $is_refund = request()->is_refund;   // 获取退款订单 
         $is_return = request()->is_return; // 获取退货订单
 
@@ -847,16 +850,35 @@ class OrderService extends BaseService{
             $query->where('group_log_id',$group_log_id);
         })->when(!empty($created_at), function($query) use($created_at){
             $query->whereBetween('created_at',[$created_at[0],$created_at[1]]);
-        })->when(isset($order_status), function($query) use($order_status){
-            $query->where('order_status',request()->order_status);
         })->when(isset($is_refund), function($query) use($is_refund){
             $query->where('order_status',5)->where('refund_status',0);
         })->when(isset($is_return), function($query) use($is_return){
             $query->where('order_status',5)->where('refund_status',1);
         });
 
-
-        $order_model = $order_model->orderBy('id','desc')->paginate(request()->per_page ?? 30);
+        if($type)
+        {
+            switch ($type) {
+                case 0:
+                    # code...
+                    break;
+                case 1:
+                $order_model->where('order_status', Constant::ORDER_STATUS_WAITPAY);
+                    break;
+                case 2:
+                $order_model->whereIn('order_status', [Constant::ORDER_STATUS_WAITREC,Constant::ORDER_STATUS_CONFIRM]);
+                    break;
+                case 3:
+                $order_model->whereIn('order_status', [Constant::ORDER_STATUS_WAITCOMMENT,Constant::ORDER_STATUS_COMPLETE]);
+                    break;
+                case 4:
+                $order_model->where('order_status', Constant::ORDER_STATUS_CANCLE);
+                    break;
+                default:
+                    break;
+            }
+        }
+        $order_model = $order_model->orderBy('id','desc')->paginate(request()->per_page ?? 3);
         return $order_model ? new OrderCollection($order_model) : [];
     }
 
@@ -875,7 +897,7 @@ class OrderService extends BaseService{
             $order_model = $order_model->where('store_id', $store_id);
         }
 
-        $order_info = $order_model->with('order_goods')->where('id', $id)->first();
+        $order_info = $order_model->with(['order_goods', 'store'])->where('id', $id)->first();
         if(!$order_info)
         {
             throw new RequestException(CodeResponse::ORDER_INVALID);

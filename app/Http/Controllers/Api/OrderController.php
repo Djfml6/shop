@@ -17,8 +17,8 @@ class OrderController extends Controller
 
     // 创建订单
     public function create_order(OrderService $order_service){
-        $order_service->createOrder();
-        return $this->success();
+        $info = $order_service->createOrder();
+        return $this->success($info);
     }
 
     // // 创建订单前
