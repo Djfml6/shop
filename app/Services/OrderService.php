@@ -32,6 +32,21 @@ class OrderService extends BaseService{
     public function createOrderBefore(){
         $params = $this->base64Check();
         $info = $this->createOrderFormat($params);
+        // 预先计算运费
+        if(isset($params['address']))
+        {
+            $user_service = new UserService;
+            $user_info = $user_service->getUserInfo();
+            $province_id = Address::query()->where(['user_id' => $user_info->id, 'id' => $params['address']])->pluck('province_id');
+            if($province_id[0])
+            {
+                foreach ($info['order'] as $key => $value) {
+                $freight[] = $this->getFreight($value['goods_list'], $province_id[0]);
+                }
+                $info['freight'] = array_sum($freight);
+            }
+            
+        }
         return $info;
     }
 
@@ -125,33 +140,28 @@ class OrderService extends BaseService{
                     }
 
                     // 获取优惠券的金额 并插入数据库
-                    if(!empty($coupon_id[$k]))
+                    if(!empty($coupon_id))
                     {   
-                        // 店铺是否存在可用的优惠券
-                        if(empty($v['coupon_id']))
+                        //判断该优惠券是否存在允许使用的优惠券列表中
+                        $use = array_intersect($coupon_id, $v['coupon_id']);
+                        if(empty($use))
                         {
                             throw new RequestException(CodeResponse::VALIDATION_ERROR, '店铺不存在可用的优惠券');
                         }
 
                         // 一个店铺同时只能使用一张优惠券
-                        if(!is_numeric($coupon_id[$k]))
+                        if(count($use) > 1)
                         {
                             throw new RequestException(CodeResponse::VALIDATION_ERROR);
                         }
 
-                        //判断该优惠券是否存在允许使用的优惠券列表中
-                        if(!in_array($coupon_id[$k], $v['coupon_id']))
-                        {
-                            throw new RequestException(CodeResponse::VALIDATION_ERROR, '优惠券无效');
-                        }
-
                         // 开始提取优惠券折扣金额
-                        $r = collect($rs['coupons'])->where('id', $coupon_id[$k])->first();
+                        $r = collect($rs['coupons'])->where('id', $use[0])->first();
                         $coupon_money = $r['coupon_price'];
-                        $cp = $coupon_log_model->find($coupon_id[$k]);
+                        $cp = $coupon_log_model->find($use[0]);
                         $cp->status = 1;
                         $cp->order_id = $order_info->id;
-                        $order_info->coupon_id = $coupon_id[$k];
+                        $order_info->coupon_id = $use[0];
                     }
 
 
