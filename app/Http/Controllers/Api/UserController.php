@@ -54,15 +54,24 @@ class UserController extends Controller
         $user_info = $user_service->getUserInfo();
 
         $data = [];
-        // 获取订单数量
-        $order_model = new Order();
-        $data['count']['wait_pay'] = $order_model->where(['user_id' => $user_info['id'], 'order_status' => Constant::ORDER_STATUS_WAITPAY])->count();
-        $data['count']['wait_rec'] = $order_model->where(['user_id' => $user_info['id'], 'order_status' => Constant::ORDER_STATUS_WAITREC])->count();
-        $data['count']['confirm'] = $order_model->where(['user_id' => $user_info['id'], 'order_status' => Constant::ORDER_STATUS_CONFIRM])->count();
-        $data['count']['wait_comment'] = $order_model->where(['user_id' => $user_info['id'], 'order_status' => Constant::ORDER_STATUS_WAITCOMMENT])->count();
-        $data['count']['service'] = $order_model->where(['user_id' => $user_info['id'], 'order_status' => Constant::ORDER_STATUS_SERVICE])->count();
-
+        // 未使用的优惠券数量
         $data['user'] = $user_info;
+        $data['user']['coupon'] = $user_info->coupon_log->where('status' , Constant::COUPON_STATUS_NOT_USED)->count();
+
+        // 用户等级
+        $data['user']['level_name'] = $user_info->level->level_name; 
+
+        // 获取订单数量
+        $data['user']['order_count'] = $user_info->order->count();
+        $data['user']['order_pay_count'] = $user_info->order->where('order_status' , Constant::ORDER_STATUS_WAITPAY)->count();
+
+        // 历史记录
+        $data['user']['history_count'] = $user_info->history->count();
+
+        // 收藏商品
+        $data['user']['fav_goods'] = $user_info->favorite->where('is_type' , Constant::FAVORITES_TYPE_GOODS)->count();
+        // 收藏店铺
+        $data['user']['fav_store'] = $user_info->favorite->where('is_type' , Constant::FAVORITES_TYPE_STORE)->count();
         return $this->success($data);
     }
 

@@ -859,19 +859,19 @@ class OrderService extends BaseService{
         if($type)
         {
             switch ($type) {
-                case 0:
+                case 'a':
                     # code...
                     break;
-                case 1:
+                case 'b':
                 $order_model->where('order_status', Constant::ORDER_STATUS_WAITPAY);
                     break;
-                case 2:
+                case 'c':
                 $order_model->whereIn('order_status', [Constant::ORDER_STATUS_WAITREC,Constant::ORDER_STATUS_CONFIRM]);
                     break;
-                case 3:
+                case 'd':
                 $order_model->whereIn('order_status', [Constant::ORDER_STATUS_WAITCOMMENT,Constant::ORDER_STATUS_COMPLETE]);
                     break;
-                case 4:
+                case 'e':
                 $order_model->where('order_status', Constant::ORDER_STATUS_CANCLE);
                     break;
                 default:

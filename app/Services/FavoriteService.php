@@ -7,33 +7,46 @@ use App\Http\Constant;
 use App\Models\Favorite;
 use App\Exceptions\RequestException;
 use App\Http\CodeResponse;
+use Carbon\Carbon;
 
 class FavoriteService extends BaseService{
 
     public function getFav(){
         $type = request()->type;
+        $lookType = request()->lookType ?? null;
         $user_service = new UserService;
         $user_info = $user_service->getUserInfo();
         $fav_model = Favorite::query()->where(['user_id' => $user_info->id, 'is_type' => $type]);
         
+        if(!is_null($lookType))
+        {
+            if($lookType == "w")
+            {
+                $start = Carbon::now()->startOfWeek();
+                $end = Carbon::now()->endOfWeek();
+            }elseif ($lookType == "m") {
+                $start = Carbon::now()->startOfMonth();
+                $end = Carbon::now()->endOfMonth();
+            }elseif ($lookType == "y") {
+                $start = Carbon::now()->startOfYear();
+                $end = Carbon::now()->endOfYear();
+            }
+            $fav_model->whereBetween('created_at', [$start, $end]);
+        }
         if($type == Constant::FAVORITES_TYPE_GOODS){
 
             $fav_model = $fav_model->with(['goods'=>function($q){
                 return $q->select('id','goods_master_image','goods_price','goods_name','goods_subname')->with('goods_sku');
             }]);
-
             $fav_list = $fav_model->paginate(request()->per_page ?? 30);
             return new FavoriteCollection($fav_list);
         }else{
-
             $fav_model = $fav_model->with(['store'=>function($q){
                 return $q->select('id','store_name','store_logo');
             }]);
             $fav_list = $fav_model->paginate(request()->per_page ?? 30);
             return new FollowCollection($fav_list);
         }
-        
-        
     }
 
     // 添加收藏和关注

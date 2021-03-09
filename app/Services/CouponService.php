@@ -141,4 +141,11 @@ class CouponService extends BaseService{
         return $list;
     }
 
+    // 获取用户优惠券数量
+    public function getCouponLogCount($user_id)
+    {
+        $res = CouponLog::query()->where(['user_id' => $user_id, 'status' => Constant::COUPON_STATUS_NOT_USED])->count();
+        return $res;
+    }
+
 }

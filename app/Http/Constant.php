@@ -83,4 +83,8 @@ class Constant
 
     const SHIPPING_CONDITION_NOT_FREE = 0; //是否指定条件包邮：否
     const SHIPPING_CONDITION_FREE = 1; //是否指定条件包邮：是
+
+    // history
+    const HISTORY_TYPE_GOODS = 0;
+    const HISTORY_TYPE_STORE = 1;
 }

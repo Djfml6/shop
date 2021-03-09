@@ -36,4 +36,20 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(CouponLog::class);
     }
+    public function order()
+    {
+        return $this->hasMany(Order::class);
+    }
+    public function favorite()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+    public function level()
+    {
+        return $this->beLongsTo(UserLevel::class, 'user_level_id', 'id');
+    }
+    public function history()
+    {
+        return $this->hasMany(UserHistorys::class);
+    }
 }
